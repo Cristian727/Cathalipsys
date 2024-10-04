@@ -11,44 +11,49 @@ public class PlayerJump : MonoBehaviour
     [SerializeField] Transform[] groundCheckPoints;
     float currentJumpPressTime;
     [SerializeField] int performedJumpCount;
-    [HideInInspector] public Stats stats;
-    float timeOnAir;
+    [SerializeField] int maxOnAirJumps = 1; 
+    [SerializeField] float jumpStrength = 10f; 
     [SerializeField] float jumpInterval = 1f; 
     private float jumpTimer;
 
+
+    [SerializeField] float upGravity = 1f;
+    [SerializeField] float downGravity = 2f;
+    [SerializeField] float peakGravity = 0.5f;
+    [SerializeField] float yVelocityLowGravityThreshold = 0.1f;
+
+    float timeOnAir;
 
     void Start()
     {
         performedJumpCount = 0;
         rb = GetComponent<Rigidbody2D>();
-        jumpTimer = jumpInterval; 
+        jumpTimer = jumpInterval;
     }
-
 
     void Update()
     {
         jumpTimer -= Time.deltaTime;
 
-
-        if (jumpTimer <= 0 && (isGrounded || performedJumpCount < stats.onAirJumps))
+        if (jumpTimer <= 0 && (isGrounded || performedJumpCount < maxOnAirJumps))
         {
             currentJumpPressTime = 0;
             performedJumpCount += 1;
-            rb.velocity = new Vector2(rb.velocity.x, stats.jumpStrength);
-            jumpTimer = jumpInterval; 
+            rb.velocity = new Vector2(rb.velocity.x, jumpStrength);
+            jumpTimer = jumpInterval;
         }
 
-        if (rb.velocity.y < stats.yVelocityLowGravityThreshold && rb.velocity.y > -stats.yVelocityLowGravityThreshold)
+        if (rb.velocity.y < yVelocityLowGravityThreshold && rb.velocity.y > -yVelocityLowGravityThreshold)
         {
-            rb.gravityScale = stats.peakGravity;
+            rb.gravityScale = peakGravity;
         }
         else if (rb.velocity.y > 0)
         {
-            rb.gravityScale = stats.upGravity;
+            rb.gravityScale = upGravity;
         }
         else
         {
-            rb.gravityScale = stats.downGravity;
+            rb.gravityScale = downGravity;
         }
 
 
@@ -66,7 +71,7 @@ public class PlayerJump : MonoBehaviour
                 timeOnAir = 0;
                 isGrounded = true;
                 performedJumpCount = 0;
-                rb.gravityScale = stats.upGravity;
+                rb.gravityScale = upGravity;
                 break;
             }
         }
